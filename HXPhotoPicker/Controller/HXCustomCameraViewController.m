@@ -571,10 +571,12 @@ CLLocationManagerDelegate
         self.videoCropBtn.hidden = YES;
         [self showBottomToolsView];
         self.cancelBtn.hidden = NO;
+        self.navItem.leftBarButtonItem.hidden = NO;
     }
 }
 - (void)takePicturesFailed {
     self.cancelBtn.hidden = NO;
+    self.navItem.leftBarButtonItem.hidden = NO;
     self.changeCameraBtn.hidden = NO;
     self.cancelBtn.selected = NO;
     self.cancelBtn.hx_w = 50;
@@ -611,6 +613,7 @@ CLLocationManagerDelegate
 }
 - (void)videoNeedHideViews {
     self.cancelBtn.hidden = YES;
+    self.navItem.leftBarButtonItem.hidden = YES;
     self.cancelBtn.selected = YES;
     self.cancelBtn.hx_w = [self.cancelBtn.titleLabel hx_getTextWidth] + 10;
     self.changeCameraBtn.hidden = YES;
@@ -645,6 +648,7 @@ CLLocationManagerDelegate
         self.currentZoomFacto = self.cameraController.currentZoomFacto;
     }
     self.cancelBtn.hidden = NO;
+    self.navItem.leftBarButtonItem.hidden = NO;
 }
 - (void)mediaCaptureFailedWithError:(NSError *)error {
     [self stopTimer];
@@ -655,6 +659,7 @@ CLLocationManagerDelegate
     self.cancelBtn.hx_w = 50;
     self.changeCameraBtn.hidden = NO;
     self.cancelBtn.hidden = NO;
+    self.navItem.leftBarButtonItem.hidden = NO;
 }
 - (void)bottomDidTakePictures {
     [self.cameraController captureStillImage];
@@ -679,6 +684,7 @@ CLLocationManagerDelegate
     self.changeCameraBtn.hidden = YES;
     self.bottomView.hidden = YES;
     self.cancelBtn.hidden = YES;
+    self.navItem.leftBarButtonItem.hidden = YES;
 }
 - (void)playViewAnimateCompletion {
     if (self.bottomView.inTranscribe) {
