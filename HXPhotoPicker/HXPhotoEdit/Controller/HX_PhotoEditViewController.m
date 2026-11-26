@@ -216,8 +216,18 @@
 - (void)deviceOrientationChanged:(NSNotification *)notify {
     self.orientationDidChange = YES;
 }
+- (UIInterfaceOrientation)currentOrientation {
+
+    if (@available(iOS 13.0, *)) {
+        UIWindowScene *scene = self.view.window.windowScene;
+        if (scene) {
+            return scene.interfaceOrientation;
+        }
+    }
+    return UIInterfaceOrientationUnknown;
+}
 - (void)changeSubviewFrame {
-    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+    UIInterfaceOrientation orientation = [self currentOrientation];
     CGFloat leftMargin = hxBottomMargin;
     if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown || HX_UI_IS_IPAD) {
         leftMargin = 0;
