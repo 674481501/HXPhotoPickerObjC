@@ -263,6 +263,9 @@ CLLocationManagerDelegate
     UIBarButtonItem *rightBtn1 = [[UIBarButtonItem alloc] initWithCustomView:self.changeCameraBtn];
     if ([self.cameraController canSwitchCameras] && [self.cameraController cameraHasFlash]) {
         self.navItem.rightBarButtonItems = @[rightBtn1];
+        if (!self.cancelBtn.selected) {
+            self.navItem.leftBarButtonItem.hidden = YES;
+        }
     }
     
     self.previewView.maxScale = [self.cameraController maxZoomFactor];
@@ -301,16 +304,16 @@ CLLocationManagerDelegate
 }
 - (void)changeSubviewFrame {
     self.customNavigationBar.frame = CGRectMake(0, self.previewView.hx_y, self.view.hx_w, hxNavigationBarHeight);
-    if (!HX_IS_IPhoneX_All && HX_IOS11_Later) {
+    if (!CP_IsFullScreen && HX_IOS11_Later) {
         self.customNavigationBar.hx_y = self.previewView.hx_y + 10;
         self.topView.frame = self.customNavigationBar.frame;
         self.topView.hx_y = -10;
-    }else if (HX_IS_IPhoneX_All) {
+    }else if (CP_IsFullScreen) {
         self.customNavigationBar.hx_y = self.previewView.hx_y - 40;
         self.topView.frame = self.customNavigationBar.frame;
     }
     self.topMaskLayer.frame = self.topView.bounds;
-    if (HX_IS_IPhoneX_All) {
+    if (CP_IsFullScreen) {
         self.bottomView.frame = CGRectMake(0, self.view.hx_h - 100 - self.previewView.hx_y, self.view.hx_w, 130);
     }else {
         self.bottomView.frame = CGRectMake(0, self.view.hx_h - 130 - self.previewView.hx_y, self.view.hx_w, 130);
@@ -331,13 +334,44 @@ CLLocationManagerDelegate
 #pragma clang diagnostic ignored"-Wdeprecated-declarations"
     [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationFade];
 #pragma clang diagnostic pop
-    AVCaptureConnection *previewLayerConnection = [(AVCaptureVideoPreviewLayer *)self.previewView.previewLayer connection];
-    if ([previewLayerConnection isVideoOrientationSupported])
-        [previewLayerConnection setVideoOrientation:(AVCaptureVideoOrientation)[[UIApplication sharedApplication] statusBarOrientation]];
+//    AVCaptureConnection *previewLayerConnection = [(AVCaptureVideoPreviewLayer *)self.previewView.previewLayer connection];
+//    if ([previewLayerConnection isVideoOrientationSupported])
+//        [previewLayerConnection setVideoOrientation:(AVCaptureVideoOrientation)[[UIApplication sharedApplication] statusBarOrientation]];
+    AVCaptureConnection *previewLayerConnection =
+    [(AVCaptureVideoPreviewLayer *)self.previewView.previewLayer connection];
+    
+    if (previewLayerConnection.isVideoOrientationSupported)
+        previewLayerConnection.videoOrientation =
+                [self currentCaptureVideoOrientation];
     
     [self preferredStatusBarUpdateAnimation];
     if (self.manager.viewWillAppear) {
         self.manager.viewWillAppear(self);
+    }
+}
+- (AVCaptureVideoOrientation)currentCaptureVideoOrientation {
+    UIInterfaceOrientation orientation = UIInterfaceOrientationPortrait;
+
+    if (@available(iOS 13.0, *)) {
+        UIWindowScene *windowScene = self.view.window.windowScene;
+        orientation = windowScene.interfaceOrientation;
+    } else {
+        orientation = UIApplication.sharedApplication.statusBarOrientation;
+    }
+
+    switch (orientation) {
+        case UIInterfaceOrientationLandscapeLeft:
+            return AVCaptureVideoOrientationLandscapeLeft;
+
+        case UIInterfaceOrientationLandscapeRight:
+            return AVCaptureVideoOrientationLandscapeRight;
+
+        case UIInterfaceOrientationPortraitUpsideDown:
+            return AVCaptureVideoOrientationPortraitUpsideDown;
+
+        case UIInterfaceOrientationPortrait:
+        default:
+            return AVCaptureVideoOrientationPortrait;
     }
 }
 - (void)viewWillDisappear:(BOOL)animated {
@@ -767,7 +801,7 @@ CLLocationManagerDelegate
         _cancelBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         [_cancelBtn setTitle:[NSBundle hx_localizedStringForKey:@"重拍"] forState:UIControlStateSelected];
         [_cancelBtn setTitle:@"" forState:UIControlStateNormal];
-        [_cancelBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+        [_cancelBtn setTitleColor:[UIColor redColor] forState:UIControlStateSelected];
         [_cancelBtn addTarget:self action:@selector(cancelClick:) forControlEvents:UIControlEventTouchUpInside];
         _cancelBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
         _cancelBtn.hx_size = CGSizeMake(50, 50);
